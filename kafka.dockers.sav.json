@@ -27,7 +27,7 @@
     "ClusterSize" : {
       "Description" : "Number of nodes to launch",
       "Type" : "Number",
-      "Default": 1
+      "Default": 2
     },
     "DockerImage" : {
       "Description" : "Path of the Kafka Docker image (format: '[<registry>[:<port>]/]<repository>:<version>')",
@@ -100,7 +100,7 @@
         "AMI" : "ami-8d123ebd"
       },
       "eu-west-1" : {
-        "AMI" : "ami-1f5f4e79"
+        "AMI" : "ami-67273101"
       },
       "ap-southeast-1" : {
         "AMI" : "ami-64b88936"
@@ -220,7 +220,6 @@
 	  "export KAFKA_ADVERTISED_PORT=9092\n",
 	  "export KAFKA_ZOOKEEPER_CONNECT=$ZK_CONNECT\n",
 	  "export KAFKA_ADVERTISED_HOST_NAME=`ec2metadata --local-hostname`\n",
-	  "export KAFKA_HEAP_OPTS=\"-Xmx7G -Xms7G\"\n",
 	  "export KAFKA_HOME=/opt/kafka\n",
 
 	  "start-kafka.sh &\n",

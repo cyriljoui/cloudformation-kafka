@@ -27,7 +27,7 @@
     "ClusterSize" : {
       "Description" : "Number of nodes to launch",
       "Type" : "Number",
-      "Default": 1
+      "Default": 2
     },
     "DockerImage" : {
       "Description" : "Path of the Kafka Docker image (format: '[<registry>[:<port>]/]<repository>:<version>')",
@@ -100,7 +100,7 @@
         "AMI" : "ami-8d123ebd"
       },
       "eu-west-1" : {
-        "AMI" : "ami-1f5f4e79"
+        "AMI" : "ami-67273101"
       },
       "ap-southeast-1" : {
         "AMI" : "ami-64b88936"
@@ -200,7 +200,6 @@
           "#!/bin/bash -ex\n",
 
           "# Helper function\n",
-	  "sudo su\n",
           "function error_exit\n",
           "{\n",
           "  cfn-signal -e 1 -r \"$1\" '", { "Ref" : "WaitHandle" }, "'\n",
@@ -216,14 +215,15 @@
           "export ZK_HOSTS=`echo $EX_DATA |./jq '.servers | join (\",\")' | sed -e \"s/,/:$ZK_PORT,/g\" | sed -e \"s/\\\"//g\"`:$ZK_PORT\n",
           "export ZK_CONNECT=$ZK_HOSTS", {"Ref": "KafkaChroot"} , "\n",
           "export IP=`curl -s http://169.254.169.254/latest/meta-data/local-ipv4`\n",
-	  "export KAFKA_BROKER_ID=${IP##*.}\n",
-	  "export KAFKA_ADVERTISED_PORT=9092\n",
-	  "export KAFKA_ZOOKEEPER_CONNECT=$ZK_CONNECT\n",
-	  "export KAFKA_ADVERTISED_HOST_NAME=`ec2metadata --local-hostname`\n",
-	  "export KAFKA_HEAP_OPTS=\"-Xmx7G -Xms7G\"\n",
-	  "export KAFKA_HOME=/opt/kafka\n",
 
-	  "start-kafka.sh &\n",
+          "# Set up and start the Kafka service\n",
+          "sudo docker pull ", { "Ref": "DockerImage" }, "\n",
+          "sudo docker run -p 9092:9092",
+          " -e KAFKA_BROKER_ID=${IP##*.}",
+          " -e KAFKA_ADVERTISED_PORT=9092",
+          " -e KAFKA_ZOOKEEPER_CONNECT=$ZK_CONNECT",
+          " -e \"KAFKA_ADVERTISED_HOST_NAME=`ec2metadata --local-hostname`\"",
+          " ", { "Ref": "DockerImage" }, " & \n",
 
           "# All is well so signal success\n",
           "cfn-signal -e 0 -r \"Stack setup complete\" '", { "Ref" : "WaitHandle" }, "'\n",
